@@ -1,0 +1,38 @@
+---
+title: "Proposal"
+author: "Alex Thompson"
+date: "10/29/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## The Team
+
+**Project Cordinator:**
+
+Alex Thompson
+
+**Team Members:**
+
+Mikaela Blount
+
+Jaden Birkner
+
+## The Data
+
+**Data Source:**
+
+https://data.cityofnewyork.us/Health/DOHMH-New-York-City-Restaurant-Inspection-Results/43nn-pn8j/data
+
+**Overview and Backround of the Dataset:**
+
+  The dataset is record of adjudicated violation citations for resturants and cafeterias in the New York City area in the three years prior to the most recent observation. There are many critical details to understanding the data. The dataset is very large, both in the varaibles and entries it holds. The variables for this dataset include critical and useful information such as a CAMIS, record ID, that can serve as a primary key, many descriptive variables, ranging from eateries name to cusine offered, and vital information such as violation type and exact location of the resurant. Such a large and descriptive data set will provide a chance to make profound and well informed conclusions.
+
+## Exploratory Analysis
+
+  Our plan for the dataset is to first clean and format the data properly for analysis. This will include transforming variables to be more usable and cleaning up `NA` values and other holes in the entries so that they can be used to draw conclusions from. After cleaning is done we will perform the usual base level analysis first. Find information such as summary statistics, frequency statistics, and correlation for and between all the different variables. Performing these tasks will allow for us to form an even stronger plan of action for what questions we should be asking. However, before this type of basic analysis is performed there are some questions that clearly the dataset could aide in answering. Questions such as, what cuisines generate more citations, how often are citations considered critical, are citations increasing or decreasing in frequency over time? These type of questions can be handled by manipulating the data to find statistics and visulaizing the data in the form of plots that clearly communicate vital information for understanding the dataset. 
+  
+  A unique question and answer that is avialable for this dataset is what does the frequency of citations look like accross the city? We will be answering this question in a very interesting way. In the package `leaflet` there is a powerful tool that allows you to connect information to a geographical location, and then display a map with the entries spread accross their proper geographic locations. We will be able to accomplish this as every entry in the dataset provides a longitude and latitude. Using this kind of model will provide a unique and interactive way to explore the dataset and answer questions about citations and the locations they occur in. Further, we can apply filters to what is passed into the model and make conclusions about things such as, where are certaint cuisines served in the city, what kind of citations are the most common in an area, are some areas more likely to recieve critical flags than others? By using the variables in this dataset to create a uniquely interactive visual model we should be able to tackle these questions and provide strong conclusions and insights into the dataset. 
