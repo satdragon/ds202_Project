@@ -1,0 +1,138 @@
+---
+title: "nyc"
+author: "Mikaela Blount"
+date: "12/3/2019"
+output: html_document
+---
+Cuisine description.
+
+```{r}
+library(tidyverse)
+library(tidyr)
+library(leaflet)
+library(leaflet.extras)
+library(ggmap)
+```
+
+
+```{r}
+nyc <- read.csv("~/Downloads/DOHMH_New_York_City_Restaurant_Inspection_Results.csv")
+```
+
+Col Names for quick reference
+```{r}
+names(nyc)
+str(nyc)
+```
+
+```{r}
+length(table(nyc$CUISINE.DESCRIPTION))
+
+table(nyc$CRITICAL.FLAG)
+```
+
+Restaurants that did not have a correct input were labeled as 0 so we are removing them.
+```{r}
+nyc = nyc %>%
+  filter(BORO != '0')
+
+```
+
+
+```{r}
+nycFlag = nyc %>%
+  filter(CRITICAL.FLAG == "Y") %>%
+  group_by(BORO) 
+  
+table(nycFlag$BORO)
+table(nyc$BORO)
+
+table(nycFlag$BORO)/table(nyc$BORO)
+
+```
+
+
+```{r}
+table(nyc$CUISINE.DESCRIPTION)
+#table(nyc$CUISINE.DESCRIPTION[nyc$SCORE>=7])/table(nyc$CUISINE.DESCRIPTION)
+#table(nyc$CUISINE.DESCRIPTION[nyc$CRITICAL.FLAG=="Y"])/table(nyc$CUISINE.DESCRIPTION)
+#top10 = table(nyc$CUISINE.DESCRIPTION[nyc$SCORE>=12])/table(nyc$CUISINE.DESCRIPTION)
+```
+
+
+```{r}
+nyc %>%
+  group_by(CUISINE.DESCRIPTION) %>%
+  tally(SCORE) %>%
+  top_n(10)
+
+nyc %>%
+  group_by(CUISINE.DESCRIPTION) %>%
+  tally(length(CUISINE.DESCRIPTION)) %>%
+  arrange(desc(n)) %>%
+  top_n(10)
+```
+
+```{r}
+nyc %>%
+  group_by(CUISINE.DESCRIPTION) %>%
+  tally(SCORE/length(CUISINE.DESCRIPTION)) %>%
+  arrange(desc(n)) %>%
+  top_n(10)
+
+```
+
+
+```{r}
+bangladeshi = nyc %>%
+  filter(CUISINE.DESCRIPTION == "Bangladeshi")
+
+boxplot(bangladeshi$SCORE,horizontal = TRUE)
+mean(bangladeshi$SCORE,na.rm = TRUE)
+median(bangladeshi$SCORE,na.rm = TRUE)
+```
+
+
+```{r}
+nyc %>%
+  group_by(DBA) %>%
+  tally(length(DBA)) %>%
+  top_n(10) %>%
+  arrange(desc(n))
+
+length(nyc$DBA[nyc$DBA=="GOLDEN KRUST CARIBBEAN BAKERY & GRILL"])
+```
+
+
+```{r}
+nycChain = nyc %>%
+  unite("address",c("BUILDING","STREET"))
+```
+
+
+```{r}
+nycChain %>%
+  group_by(DBA) %>%
+  tally(SCORE/length(DBA)) %>%
+  arrange(desc(n)) %>%
+  top_n(10)
+```
+
+
+
+```{r}
+nycBrosFM = nycChain %>%
+  filter(DBA == "BROTHERS FISH MARKET")
+
+
+leaflet(data = nycBrosFM) %>%
+      addTiles(
+        urlTemplate = "//{s}.tiles.mapbox.com/v3/jcheng.map-5ebohr46/{z}/{x}/{y}.png",
+        attribution = 'Maps by <a href="http://www.mapbox.com/">Mapbox</a>') %>%
+      addMarkers(lat = ~Latitude, lng = ~Longitude)
+
+```
+
+
+
+
