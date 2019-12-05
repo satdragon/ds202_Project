@@ -1,0 +1,70 @@
+---
+title: "VC and IT variable exploration"
+author: "Alex Thompson"
+date: "12/5/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+##data load
+data = read.csv("nycdata.csv")
+library(tidyverse)
+library(knitr)
+data[data==""] = NA
+getmode <- function(v) {
+   uniqv <- unique(v)
+   uniqv[which.max(tabulate(match(v, uniqv)))]
+}
+```
+
+Displaying the levels of Violation Codes and Inspection Types.
+
+```{r echo=FALSE}
+summary(data[,"VIOLATION.CODE"])
+summary(data[,"INSPECTION.TYPE"])
+```
+
+```{r include=FALSE}
+violationCode = group_by(data, VIOLATION.CODE)
+```
+
+Information about each code, with average score, and modes
+
+```{r echo=FALSE}
+kable(head(arrange(summarise(violationCode, SCORE = mean(SCORE), CUISINE.DESCRIPTION = getmode(CUISINE.DESCRIPTION), BORO = getmode(BORO), INSPECTION.TYPE = getmode(INSPECTION.TYPE)),SCORE),20))
+```
+
+```{r include=FALSE}
+freq = data.frame(table(violationCode[,"VIOLATION.CODE"]) )
+names(freq) = c("ViolationCode", "Frequency")
+```
+
+Visualization of most frequent violation codes
+
+```{r echo=FALSE}
+freq = arrange(freq, -Frequency)
+ggplot(freq[1:10,],aes(x=ViolationCode, y=Frequency, color = ViolationCode)) + geom_point(aes(size = 2)) + guides(color=FALSE, n=FALSE, size = FALSE) + labs(x="Violation Code", title="Frequency of Top 10 Violation Codes")
+```
+
+```{r include=FALSE}
+inspectionType = group_by(data, INSPECTION.TYPE)
+```
+
+Inspection Type average scores and modes
+```{r echo=FALSE}
+kable(head(arrange(summarise(inspectionType, SCORE = mean(SCORE), CUISINE.DESCRIPTION = getmode(CUISINE.DESCRIPTION), BORO = getmode(BORO), VIOLATION.CODE = getmode(VIOLATION.CODE)),SCORE),15))
+```
+
+
+```{r echo=FALSE}
+freq = data.frame(table(inspectionType[,"INSPECTION.TYPE"]) )
+names(freq) = c("InspectionType", "Frequency")
+freq = arrange(freq, -Frequency)
+ggplot(freq[1:4,],aes(x=InspectionType, y=Frequency, color = InspectionType)) + geom_point(aes(size = 2)) + guides(color=FALSE, n=FALSE, size = FALSE) + labs(x="Inspection Type", title="Frequency of Top 10 Inspection Types") + theme(axis.text.x = element_text(angle =10, hjust = 1))
+```
