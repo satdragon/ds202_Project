@@ -1,0 +1,73 @@
+---
+title: "Jaden's_Exploratory_Analysis"
+author: "Jaden Birkner"
+date: "12/4/2019"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(tidyr)
+```
+
+
+```{r}
+nyc = read.csv("NYC.csv")
+names(nyc) <- tolower(names(nyc))
+head(nyc)
+```
+
+```{r}
+str(nyc)
+```
+
+
+```{r}
+nyc$critical.flag[nyc$critical.flag == ""] <- NA
+nyc = drop_na(nyc)
+str(nyc)
+```
+
+```{r}
+ggplot(nyc, aes(x=boro)) + geom_bar()
+```
+
+```{r}
+ggplot(nyc, aes(x=boro)) + geom_bar(aes(fill=critical.flag), position = "fill")
+
+```
+
+```{r}
+nyc2 = filter(nyc, grade != "")
+length(nyc2$grade)
+```
+
+
+```{r}
+ggplot(nyc2, aes(x=boro)) + geom_bar(aes(fill=grade), position = "fill")
+```
+
+```{r}
+nyc3 = filter(nyc, action != "")
+```
+
+
+```{r}
+group_by(nyc3, boro) %>% summarise()
+```
+
+
+
+```{r}
+ggplot(nyc, aes(x=as.numeric(nyc$action))) + geom_bar()
+```
+
+```{r}
+group_by(nyc, action) %>% summarise(length(action))
+```
+
+```{r}
+ggplot(nyc3, aes(x=as.numeric(nyc$action))) + geom_bar(aes(fill=boro), position = "fill")
+
+```
+
