@@ -14,6 +14,10 @@ library(leaflet.extras)
 library(ggmap)
 ```
 
+```{r}
+table(nyc$INSPECTION.DATE)
+```
+
 
 ```{r}
 nyc <- read.csv("~/Downloads/DOHMH_New_York_City_Restaurant_Inspection_Results.csv")
@@ -118,6 +122,13 @@ nycChain %>%
   top_n(10)
 ```
 
+```{r}
+nycCAMIS = nyc %>%
+  group_by(DBA) %>%
+  filter(!duplicated(CAMIS))
+
+length(nycCAMIS$DBA=="SUBWAY")
+```
 
 
 ```{r}
@@ -134,5 +145,56 @@ leaflet(data = nycBrosFM) %>%
 ```
 
 
+```{r}
+nyc %>%
+  group_by(CUISINE.DESCRIPTION, CAMIS) %>%
+  filter(!is.na(SCORE)) %>%
+  summarise(scoreTotal = sum(SCORE)) %>%
+  summarise(cScore = sum(scoreTotal)/length(CAMIS)) %>%
+  arrange(desc(cScore))
+```
 
+
+```{r}
+nycB = nyc %>%
+  filter(!is.na(SCORE)) %>%
+  filter(CUISINE.DESCRIPTION == "Bangladeshi") %>%
+  group_by(CAMIS) %>%
+  mutate(scoreTotal = sum(SCORE)) %>%
+  filter(!duplicated(CAMIS))
+  
+
+nycB
+```
+
+
+
+```{r}
+leaflet(data = nycB) %>%
+      addTiles(
+        urlTemplate = "//{s}.tiles.mapbox.com/v3/jcheng.map-5ebohr46/{z}/{x}/{y}.png",
+        attribution = 'Maps by <a href="http://www.mapbox.com/">Mapbox</a>') %>%
+      addMarkers(lat = ~Latitude, lng = ~Longitude)
+```
+
+https://rstudio.github.io/leaflet/
+```{r}
+pal <- colorNumeric(
+  # palette = "Reds",
+  domain = nycB$scoreTotal)
+
+ leaflet(data = nycB) %>%
+      addTiles(
+        urlTemplate = "//{s}.tiles.mapbox.com/v3/jcheng.map-5ebohr46/{z}/{x}/{y}.png",
+        attribution = 'Maps by <a href="http://www.mapbox.com/">Mapbox</a>') %>%
+      addCircleMarkers(color = ~pal(nycB$scoreTotal), opacity = 1) %>%
+     addLegend("bottomright", pal = pal, values = ~nycB$scoreTotal,
+    title = "Score By Restaurant",
+    labFormat = labelFormat(prefix = ""),
+    opacity = 1
+  ) %>%
+      addSearchOSM() %>%
+      addResetMapButton()
+
+```
 
