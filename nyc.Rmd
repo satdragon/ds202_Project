@@ -57,9 +57,9 @@ table(nycFlag$BORO)/table(nyc$BORO)
 
 
 ```{r}
-table(nyc$CUISINE.DESCRIPTION)
+#table(nyc$CUISINE.DESCRIPTION)
 #table(nyc$CUISINE.DESCRIPTION[nyc$SCORE>=7])/table(nyc$CUISINE.DESCRIPTION)
-#table(nyc$CUISINE.DESCRIPTION[nyc$CRITICAL.FLAG=="Y"])/table(nyc$CUISINE.DESCRIPTION)
+table(nyc$CUISINE.DESCRIPTION[nyc$CRITICAL.FLAG=="Y"])/table(nyc$CUISINE.DESCRIPTION)
 #top10 = table(nyc$CUISINE.DESCRIPTION[nyc$SCORE>=12])/table(nyc$CUISINE.DESCRIPTION)
 ```
 
@@ -145,14 +145,15 @@ leaflet(data = nycBrosFM) %>%
 ```
 
 
+
 ```{r}
 nyc %>%
-  group_by(CUISINE.DESCRIPTION, CAMIS) %>%
+  group_by(CUISINE.DESCRIPTION) %>%
   filter(!is.na(SCORE)) %>%
-  summarise(scoreTotal = sum(SCORE)) %>%
-  summarise(cScore = sum(scoreTotal)/length(CAMIS)) %>%
-  arrange(desc(cScore))
+  summarise(avgScore = mean(SCORE)) %>%
+  arrange(desc(avgScore))
 ```
+
 
 
 ```{r}
