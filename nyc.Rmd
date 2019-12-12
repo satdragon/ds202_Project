@@ -148,10 +148,15 @@ leaflet(data = nycBrosFM) %>%
 
 ```{r}
 nyc %>%
-  group_by(CUISINE.DESCRIPTION) %>%
+  group_by(CAMIS) %>%
   filter(!is.na(SCORE)) %>%
-  summarise(avgScore = mean(SCORE)) %>%
+  mutate(totalScore = sum(SCORE)) %>%
+  filter(!duplicated(CAMIS)) %>%
+  group_by(CUISINE.DESCRIPTION) %>%
+  summarise(avgScore = sum(totalScore)/length(CAMIS)) %>%
   arrange(desc(avgScore))
+
+
 ```
 
 
@@ -161,7 +166,7 @@ nycB = nyc %>%
   filter(!is.na(SCORE)) %>%
   filter(CUISINE.DESCRIPTION == "Bangladeshi") %>%
   group_by(CAMIS) %>%
-  mutate(scoreTotal = sum(SCORE)) %>%
+  mutate(totalScore = sum(SCORE)) %>%
   filter(!duplicated(CAMIS))
   
 
@@ -181,15 +186,15 @@ leaflet(data = nycB) %>%
 https://rstudio.github.io/leaflet/
 ```{r}
 pal <- colorNumeric(
-  # palette = "Reds",
-  domain = nycB$scoreTotal)
+   palette = "Reds",
+  domain = nycB$totalScore)
 
  leaflet(data = nycB) %>%
       addTiles(
         urlTemplate = "//{s}.tiles.mapbox.com/v3/jcheng.map-5ebohr46/{z}/{x}/{y}.png",
         attribution = 'Maps by <a href="http://www.mapbox.com/">Mapbox</a>') %>%
-      addCircleMarkers(color = ~pal(nycB$scoreTotal), opacity = 1) %>%
-     addLegend("bottomright", pal = pal, values = ~nycB$scoreTotal,
+      addCircleMarkers(color = ~pal(nycB$totalScore), opacity = 1) %>%
+     addLegend("bottomright", pal = pal, values = ~nycB$totalScore,
     title = "Score By Restaurant",
     labFormat = labelFormat(prefix = ""),
     opacity = 1
