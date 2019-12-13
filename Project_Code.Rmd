@@ -1,17 +1,300 @@
 ---
-title: 'DS 202:  Final Project Report'
+title: 'DS 202:  Final Project Code'
 author: "Jaden Birkner"
 date: "12/7/2019"
 output: html_document
 ---
 
-### Outline:
-#### - Description of background and questions raised
+#Jaden
+```{r}
+library(tidyverse)
+library(tidyr)
+```
 
-The dataset we analyized came from 
 
-#### - The pipeline for obtaining and cleaning the dataset
-#### - The exploratory analysis
-#### - Steps for data wrangling and visualization
-#### - Answers to the questions raised
-#### - Conclusion
+```{r}
+nycdf = read.csv("nycdata.csv")
+names(nycdf) <- tolower(names(nycdf))
+head(nycdf)
+```
+
+```{r}
+str(nycdf)
+```
+
+Cleaning data for analysis of boroughs.
+
+```{r}
+nyc = filter(nycdf, boro != 0)
+nyc = drop_na(nyc)
+str(nyc)
+```
+
+```{r}
+filter(nyc, boro == 0)
+```
+
+Exploring distribution of restaurants across boroughs.
+
+```{r}
+ggplot(nyc, aes(x=boro)) + geom_bar()
+```
+
+Cleaning data for analysis of grade distribution across boroughs.
+
+```{r}
+nyc2 = filter(nyc, grade != "")
+length(nyc2$grade)
+```
+
+Visualizing distribution of grades across boroughs.
+
+```{r}
+ggplot(nyc2, aes(x=boro)) + geom_bar(aes(fill=grade), position = "fill")
+```
+
+#Alex
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+##data load
+data = read.csv("nycdata.csv")
+library(knitr)
+data[data==""] = NA
+getmode <- function(v) {
+   uniqv <- unique(v)
+   uniqv[which.max(tabulate(match(v, uniqv)))]
+}
+```
+
+Displaying the levels of Violation Codes and Inspection Types.
+
+```{r echo=FALSE}
+summary(data[,"VIOLATION.CODE"])
+```
+
+```{r include=FALSE}
+violationCode = group_by(data, VIOLATION.CODE)
+```
+
+Information about each code, with average score, and modes
+
+```{r echo=FALSE}
+kable(head(arrange(summarise(violationCode, SCORE = mean(SCORE), CUISINE.DESCRIPTION = getmode(CUISINE.DESCRIPTION), BORO = getmode(BORO), INSPECTION.TYPE = getmode(INSPECTION.TYPE)),SCORE),20))
+```
+
+```{r include=FALSE}
+freq = data.frame(table(violationCode[,"VIOLATION.CODE"]) )
+names(freq) = c("ViolationCode", "Frequency")
+```
+
+Visualization of most frequent violation codes
+
+```{r echo=FALSE}
+freq = arrange(freq, -Frequency)
+ggplot(freq[1:10,],aes(x=ViolationCode, y=Frequency, color = ViolationCode)) + geom_point(aes(size = 2)) + guides(color=FALSE, n=FALSE, size = FALSE) + labs(x="Violation Code", title="Frequency of Top 10 Violation Codes")
+```
+
+#Mikaela
+
+Cuisine description.
+
+```{r}
+library(leaflet)
+library(leaflet.extras)
+library(ggmap)
+```
+
+```{r}
+table(nyc$INSPECTION.DATE)
+```
+
+
+```{r}
+nyc <- read.csv("nycdata.csv")
+```
+
+Col Names for quick reference
+```{r}
+names(nyc)
+str(nyc)
+```
+
+```{r}
+length(table(nyc$CUISINE.DESCRIPTION))
+
+table(nyc$CRITICAL.FLAG)
+```
+
+Restaurants that did not have a correct input were labeled as 0 so we are removing them.
+```{r}
+nyc = nyc %>%
+  filter(BORO != '0')
+
+```
+
+
+```{r}
+nycFlag = nyc %>%
+  filter(CRITICAL.FLAG == "Y") %>%
+  group_by(BORO) 
+  
+table(nycFlag$BORO)
+table(nyc$BORO)
+
+table(nycFlag$BORO)/table(nyc$BORO)
+
+```
+
+
+```{r}
+#table(nyc$CUISINE.DESCRIPTION)
+#table(nyc$CUISINE.DESCRIPTION[nyc$SCORE>=7])/table(nyc$CUISINE.DESCRIPTION)
+table(nyc$CUISINE.DESCRIPTION[nyc$CRITICAL.FLAG=="Y"])/table(nyc$CUISINE.DESCRIPTION)
+#top10 = table(nyc$CUISINE.DESCRIPTION[nyc$SCORE>=12])/table(nyc$CUISINE.DESCRIPTION)
+```
+
+
+```{r}
+nyc %>%
+  group_by(CUISINE.DESCRIPTION) %>%
+  tally(SCORE) %>%
+  top_n(10)
+
+nyc %>%
+  group_by(CUISINE.DESCRIPTION) %>%
+  tally(length(CUISINE.DESCRIPTION)) %>%
+  arrange(desc(n)) %>%
+  top_n(10)
+```
+
+```{r}
+nyc %>%
+  group_by(CUISINE.DESCRIPTION) %>%
+  tally(SCORE/length(CUISINE.DESCRIPTION)) %>%
+  arrange(desc(n)) %>%
+  top_n(10)
+
+```
+
+
+```{r}
+bangladeshi = nyc %>%
+  filter(CUISINE.DESCRIPTION == "Bangladeshi")
+
+boxplot(bangladeshi$SCORE,horizontal = TRUE)
+mean(bangladeshi$SCORE,na.rm = TRUE)
+median(bangladeshi$SCORE,na.rm = TRUE)
+```
+
+
+```{r}
+nyc %>%
+  group_by(DBA) %>%
+  tally(length(DBA)) %>%
+  top_n(10) %>%
+  arrange(desc(n))
+
+length(nyc$DBA[nyc$DBA=="GOLDEN KRUST CARIBBEAN BAKERY & GRILL"])
+```
+
+
+```{r}
+nycChain = nyc %>%
+  unite("address",c("BUILDING","STREET"))
+```
+
+
+```{r}
+nycChain %>%
+  group_by(DBA) %>%
+  tally(SCORE/length(DBA)) %>%
+  arrange(desc(n)) %>%
+  top_n(10)
+```
+
+```{r}
+nycCAMIS = nyc %>%
+  group_by(DBA) %>%
+  filter(!duplicated(CAMIS))
+
+length(nycCAMIS$DBA=="SUBWAY")
+```
+
+
+```{r}
+nycBrosFM = nycChain %>%
+  filter(DBA == "BROTHERS FISH MARKET")
+
+
+leaflet(data = nycBrosFM) %>%
+      addTiles(
+        urlTemplate = "//{s}.tiles.mapbox.com/v3/jcheng.map-5ebohr46/{z}/{x}/{y}.png",
+        attribution = 'Maps by <a href="http://www.mapbox.com/">Mapbox</a>') %>%
+      addMarkers(lat = ~Latitude, lng = ~Longitude)
+
+```
+
+
+
+```{r}
+nyc %>%
+  group_by(CAMIS) %>%
+  filter(!is.na(SCORE)) %>%
+  mutate(totalScore = sum(SCORE)) %>%
+  filter(!duplicated(CAMIS)) %>%
+  group_by(CUISINE.DESCRIPTION) %>%
+  summarise(avgScore = sum(totalScore)/length(CAMIS)) %>%
+  arrange(desc(avgScore))
+
+
+```
+
+
+
+```{r}
+nycB = nyc %>%
+  filter(!is.na(SCORE)) %>%
+  filter(CUISINE.DESCRIPTION == "Bangladeshi") %>%
+  group_by(CAMIS) %>%
+  mutate(totalScore = sum(SCORE)) %>%
+  filter(!duplicated(CAMIS))
+  
+
+nycB
+```
+
+
+
+```{r}
+leaflet(data = nycB) %>%
+      addTiles(
+        urlTemplate = "//{s}.tiles.mapbox.com/v3/jcheng.map-5ebohr46/{z}/{x}/{y}.png",
+        attribution = 'Maps by <a href="http://www.mapbox.com/">Mapbox</a>') %>%
+      addMarkers(lat = ~Latitude, lng = ~Longitude)
+```
+
+https://rstudio.github.io/leaflet/
+```{r}
+pal <- colorNumeric(
+   palette = "Reds",
+  domain = nycB$totalScore)
+
+ leaflet(data = nycB) %>%
+      addTiles(
+        urlTemplate = "//{s}.tiles.mapbox.com/v3/jcheng.map-5ebohr46/{z}/{x}/{y}.png",
+        attribution = 'Maps by <a href="http://www.mapbox.com/">Mapbox</a>') %>%
+      addCircleMarkers(color = ~pal(nycB$totalScore), opacity = 1) %>%
+     addLegend("bottomright", pal = pal, values = ~nycB$totalScore,
+    title = "Score By Restaurant",
+    labFormat = labelFormat(prefix = ""),
+    opacity = 1
+  ) %>%
+      addSearchOSM() %>%
+      addResetMapButton()
+
+```
+
